@@ -1,4 +1,4 @@
-# ![logo][] Image Seam Carving Using Dynamic Programming in Python
+# ![logo][] Seam Carving Using DP
 
 This is a small project to understand the concept of Image Seam Carving and how it can be done with the help of Dynamic Programming using Python environment and tools.
 
