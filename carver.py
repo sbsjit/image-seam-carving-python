@@ -1,4 +1,3 @@
-from re import S
 import sys
 
 from tqdm import trange
@@ -16,24 +15,19 @@ def calc_energy(img):
         [-1.0, -2.0, -1.0],
     ])
     filter_du = np.stack([filter_du] * 3, axis=2)
-
     filter_dv = np.array([
         [1.0, 0.0, -1.0],
         [2.0, 0.0, -2.0],
         [1.0, 0.0, -1.0],
     ])
     filter_dv = np.stack([filter_dv] * 3, axis=2)
-
     img = img.astype('float32')
     convolved = np.absolute(convolve(img, filter_du)) + np.absolute(convolve(img, filter_dv))
-
     # We sum the energies in the red, green, and blue channels
     energy_map = convolved.sum(axis=2)
-
     # Visualizing the energy map of the input image as an actual image
-    energy_map_filename = sys.argv[5]
-    imwrite(energy_map_filename, energy_map)
-
+    # energy_map_filename = sys.argv[5]
+    # imwrite(energy_map_filename, (energy_map))
     return energy_map
 
 def crop_c(img, scale_c):
@@ -43,9 +37,6 @@ def crop_c(img, scale_c):
     print("Pixels per column(width) ::", c)
     print("Number of colors/channels ::", _) #RGB
     new_c = int(scale_c * c)
-
-    # Random image generator
-    img_array = np.random.rand(10,10,3) * 255
 
     # trange from tqdm displays the smart progress meter of the loop
     for i in trange(c - new_c):
@@ -63,45 +54,39 @@ def carve_column(img):
     global name_id
     name_id += 1
     M, backtrack = minimum_seam(img)
+    
     mask = np.ones((r, c), dtype=np.bool)
-
-    j = np.argmin(M[-1]) # j -> individual column number with minimum energy value from all of the last row energies 
-    for i in reversed(range(r)): # loop starts from i, i-1, ... ..., 0
+    j = np.argmin(M[-1])
+    for i in reversed(range(r)): # loop starts from m-1, ... ..., 0
         mask[i, j] = False
         j = backtrack[i, j]
 
     mask = np.stack([mask] * 3, axis=2)
-    # print(mask)
 
-    name = "./seam-images/" + sys.argv[3] + str(name_id) + ".jpg"
-    # Visualizing the pixel seams of the input image as an actual image
-    # imwrite(name, img) 
     img = img[mask].reshape((r, c - 1, 3))
     return img
 
 def minimum_seam(img):
     r, c, _ = img.shape
-    # energy_map = calc_energy(img)
-    # print("Energy Map:: ", energy_map)
-    energy_map = np.random.randint(0, 100, size=(30, 10, 2))
+    energy_map = calc_energy(img)
     M = energy_map.copy()
     backtrack = np.zeros_like(M, dtype=np.int)
     for i in range(1, r):
         for j in range(0, c):
-            # Handle the left edge of the image, to ensure we don't index a -1
             if j == 0:
-                idx = np.argmin(M[i-1, j:j + 2])
+                idx = np.argmin(M[i - 1, j:j + 2])
                 backtrack[i, j] = idx + j
-                min_energy = M[i-1, idx + j]
-
+                min_energy = M[i - 1, idx + j]
+            elif j == c - 1:
+                idx = np.argmin(M[i - 1, j - 1:j + 1])
+                backtrack[i, j] = idx + j - 1
+                min_energy = M[i - 1, idx + j - 1] 
             else:
                 idx = np.argmin(M[i - 1, j - 1:j + 2])
                 backtrack[i, j] = idx + j - 1
                 min_energy = M[i - 1, idx + j - 1]
 
             M[i, j] += min_energy
-            # print(min_energy)
-            # print(backtrack[i, j])
     
     return M, backtrack
 
