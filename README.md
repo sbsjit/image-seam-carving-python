@@ -1,4 +1,4 @@
-# Seam Carving Using Dynamic Programming <img src="https://assets.leetcode.com/study_plan/dynamic-programming/cover.png" width="100" height="100"> 
+# Seam Carving Using Dynamic Programming <img src="https://assets.leetcode.com/study_plan/dynamic-programming/cover.png" width="50" height="50"> 
 
 This is a small project to understand the concept of Image Seam Carving and how it can be done with the help of Dynamic Programming using Python environment and tools.
 
